@@ -120,7 +120,7 @@ if submit:
             suggestions.append("Predicted power is quite low. Consider increasing PLF or improving fuel availability.")
         else:
             suggestions.append("Predicted power is low despite good PLF. Check fuel availability or consider equipment upgrades.")
-)
+
     elif predicted_power > 500:
         suggestions.append("High power output. Continue optimizing performance.")
 
