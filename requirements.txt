@@ -1,4 +1,9 @@
 streamlit
 pandas
-scikit-learn
 joblib
+scikit-learn
+matplotlib
+seaborn
+plotly
+smtplib
+email-validator
