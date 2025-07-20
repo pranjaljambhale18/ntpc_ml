@@ -1,9 +1,5 @@
 streamlit
 pandas
-joblib
+numpy
 scikit-learn
-matplotlib
-seaborn
-plotly
-smtplib
-email-validator
+joblib
