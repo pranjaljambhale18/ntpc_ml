@@ -180,7 +180,9 @@ if st.session_state.all_predictions:
         data=csv_all,
         file_name="all_ntpc_predictions.csv",
         mime="text/csv"
-    )import streamlit as st
+    )
+    
+import streamlit as st
 import pandas as pd
 import joblib
 
