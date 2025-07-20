@@ -12,7 +12,7 @@ if 'all_predictions' not in st.session_state:
 st.set_page_config(page_title="NTPC Predictor", layout="centered")
 st.title("🔮 NTPC Power & CO₂ Predictor")
 st.markdown("This app predicts power generation, CO₂ emissions, revenue, fuel cost, and profit based on your inputs.")
-@@ -41,30 +45,82 @@
+
     prediction = model.predict(input_df)
     predicted_power, predicted_co2 = prediction[0]
 
