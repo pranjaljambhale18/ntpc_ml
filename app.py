@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load model
+
 model = joblib.load("ntpc_model.pkl")
 
 
@@ -45,19 +45,16 @@ if submit:
     prediction = model.predict(input_df)
     predicted_power, predicted_co2 = prediction[0]
 
-    
     revenue = predicted_power * avg_tariff * 100
     cost = predicted_power * fuel_cost * 100
     profit = revenue - cost
 
-    
     input_df["Predicted_Power_BU"] = predicted_power
     input_df["Predicted_CO2_Tonnes"] = predicted_co2
     input_df["Revenue_Cr"] = revenue
     input_df["Fuel_Cost_Cr"] = cost
     input_df["Profit_Cr"] = profit
 
-   
     st.session_state.all_predictions.append(input_df)
 
     st.success("✅ Prediction Complete")
@@ -67,48 +64,31 @@ if submit:
     st.metric("🔥 Fuel Cost", f"₹{cost:,.2f} Cr")
     st.metric("📈 Estimated Profit", f"₹{profit:,.2f} Cr")
 
+   
+    st.markdown(" Suggestions Based on Your Inputs")
 
+    suggestions = []
 
-# ➕ Suggestion block
-st.markdown("### 💡 Suggestions Based on Your Inputs")
+    if profit < 1000:
+        suggestions.append(" Consider increasing the average tariff or optimizing operational efficiency to boost profit.")
+    if fuel_cost > 3.5:
+        suggestions.append(" Fuel cost per unit seems high. Explore cost-effective fuel procurement or optimize plant heat rate.")
+    if plf < 70:
+        suggestions.append(" Low PLF. Improve plant utilization to enhance power output and reduce per-unit cost.")
+    if re_share < 25:
+        suggestions.append(" Low RE share. Integrating more renewable energy can help reduce carbon emissions.")
+    if predicted_co2 > 1000000:
+        suggestions.append(" High CO₂ emissions. Consider increasing RE share or improving combustion efficiency.")
+    if predicted_power < 200:
+        suggestions.append(" Power generation is relatively low. Check fuel availability or PLF for optimization.")
+    if profit < 0:
+        suggestions.append(" Loss-making scenario. Review tariff rates, fuel mix, and operational strategies.")
 
-suggestions = []
-
-# 1. Profit improvement
-if profit < 1000:
-    suggestions.append("🔼 Consider increasing the average tariff or optimizing operational efficiency to boost profit.")
-
-# 2. Fuel cost too high
-if fuel_cost > 3.5:
-    suggestions.append("💸 Fuel cost per unit seems high. Explore cost-effective fuel procurement or optimize plant heat rate.")
-
-# 3. Low PLF
-if plf < 70:
-    suggestions.append("⚙️ Low PLF. Improve plant utilization to enhance power output and reduce per-unit cost.")
-
-# 4. Low renewable share
-if re_share < 25:
-    suggestions.append("🌿 Low RE share. Integrating more renewable energy can help reduce carbon emissions.")
-
-# 5. CO2 emissions very high
-if predicted_co2 > 1000000:
-    suggestions.append("🌍 High CO₂ emissions. Consider increasing RE share or improving combustion efficiency.")
-
-# 6. Power output below threshold
-if predicted_power < 200:
-    suggestions.append("🔋 Power generation is relatively low. Check fuel availability or PLF for optimization.")
-
-# 7. Negative or low profit
-if profit < 0:
-    suggestions.append("🔴 Loss-making scenario. Review tariff rates, fuel mix, and operational strategies.")
-
-
-if suggestions:
-    for s in suggestions:
-        st.info(s)
-else:
-    st.success("✅ All performance indicators look good! Keep it up.")
-
+    if suggestions:
+        for s in suggestions:
+            st.info(s)
+    else:
+        st.success("✅ All performance indicators look good! Keep it up.")
 
 
 if st.session_state.all_predictions:
