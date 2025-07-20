@@ -5,12 +5,15 @@ import joblib
 # Load trained model
 model = joblib.load("ntpc_model.pkl")
 
+# Initialize session state for storing all predictions
+if "prediction_history" not in st.session_state:
+    st.session_state.prediction_history = []
+
 # Page configuration
 st.set_page_config(page_title="NTPC Prediction Dashboard", layout="centered")
 
 st.title("NTPC Power & Emission Predictor")
 st.markdown("This tool predicts power generation, CO₂ emissions, revenue, fuel cost, and estimated profit based on key operational inputs. It also gives actionable suggestions.")
-
 st.markdown("---")
 st.subheader("Enter Plant Inputs")
 
@@ -39,7 +42,6 @@ with st.form("prediction_form"):
 
 # When form is submitted
 if submit:
-    # Prepare input for model
     input_df = pd.DataFrame([[installed_capacity, coal_received, gas_received, plf, fuel_cost, avg_tariff, re_share]],
         columns=['Installed_Capacity_MW', 'Coal_Received_MTPA', 'Gas_Received_MMSCM', 'PLF_Percentage',
                  'Fuel_Cost_per_Unit', 'Avg_Tariff (ECR)', 'RE_Share_Percentage']
@@ -51,6 +53,16 @@ if submit:
     revenue = predicted_power * avg_tariff * 100  # ₹ Cr
     cost = predicted_power * fuel_cost * 100      # ₹ Cr
     profit = revenue - cost
+
+    # Save result to session state
+    record = input_df.copy()
+    record["Predicted_Power_BU"] = predicted_power
+    record["CO2_Emissions_Tonnes"] = predicted_co2
+    record["Revenue_Cr"] = revenue
+    record["Fuel_Cost_Cr"] = cost
+    record["Profit_Cr"] = profit
+
+    st.session_state.prediction_history.append(record)
 
     # Show results
     st.markdown("## Prediction Results")
@@ -69,14 +81,12 @@ if submit:
     # Suggestions
     suggestions = []
 
-    # Power output suggestions
     if predicted_power < 50:
         if plf < 70:
             suggestions.append("Predicted power is quite low. Consider increasing PLF or improving fuel availability.")
         else:
             suggestions.append("Predicted power is low despite good PLF. Check fuel availability or consider equipment upgrades.")
 
-    # PLF based suggestions
     if plf < 50:
         suggestions.append("PLF is very low. Increase utilization to boost power output and reduce per-unit cost.")
     elif 50 <= plf < 70:
@@ -86,32 +96,27 @@ if submit:
         if predicted_co2 > 1_000_000:
             suggestions.append("You are running efficiently, but CO₂ emissions are high. Consider cleaner fuel or increase renewable share.")
 
-    # CO2 related suggestions
     if predicted_co2 > 2_000_000:
         suggestions.append("CO₂ emissions are extremely high. Focus on emission control and cleaner fuels.")
     elif predicted_co2 > 1_000_000:
         suggestions.append("CO₂ emissions are above acceptable levels. Increase renewable share or optimize combustion processes.")
 
-    # Fuel cost suggestions
     if fuel_cost > 4:
         suggestions.append("Fuel cost is high. Consider switching to more economical fuel sources or increasing efficiency.")
     elif fuel_cost < 2:
         suggestions.append("Fuel cost is low. Try locking long-term contracts to maintain this advantage.")
 
-    # RE Share suggestions
     if re_share < 20:
         suggestions.append("Renewable energy share is low. Increasing it can reduce carbon footprint and long-term fuel cost.")
     elif re_share > 60:
         suggestions.append("High renewable energy share. Ensure grid stability and storage planning is in place.")
 
-    # Profit suggestions
     if profit < 500:
         if avg_tariff < 3.5:
             suggestions.append("Estimated profit is low. Consider revisiting tariffs or operational efficiency.")
         if fuel_cost > 3.5:
             suggestions.append("High fuel cost is affecting profit. Negotiate fuel rates or increase efficiency.")
 
-    # Display suggestions
     if suggestions:
         st.markdown("## Suggestions Based on Inputs")
         st.info("Here are some suggestions to improve your KPIs:")
@@ -119,3 +124,17 @@ if submit:
             st.markdown(f"- {s}")
     else:
         st.success("All parameters look optimal. Great job!")
+
+# --- Download All Records ---
+if st.session_state.prediction_history:
+    st.markdown("---")
+    st.subheader("Download All Predicted Records")
+    full_df = pd.concat(st.session_state.prediction_history, ignore_index=True)
+    csv_data = full_df.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="📥 Download All Predictions as CSV",
+        data=csv_data,
+        file_name="ntpc_predictions.csv",
+        mime="text/csv"
+    )
