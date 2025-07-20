@@ -26,18 +26,17 @@ with st.form("prediction_form"):
     submit = st.form_submit_button("Predict")
 
 if submit:
-    input_df = pd.DataFrame([[
-        installed_capacity, coal_received, gas_received,
-        plf, fuel_cost, avg_tariff, re_share
-    ]], columns=[
-        'Installed_Capacity_MW',
-        'Coal_Received_MTPA',
-        'Gas_Received_MMSCM',
-        'PLF_Percentage',
-        'Fuel_Cost_per_Unit',
-        'Avg_Tariff (ECR)',
-        'RE_Share_Percentage'
-    ])
+    input_df = pd.DataFrame([[installed_capacity, coal_received, gas_received,
+                               plf, fuel_cost, avg_tariff, re_share]],
+                             columns=[
+                                 'Installed_Capacity_MW',
+                                 'Coal_Received_MTPA',
+                                 'Gas_Received_MMSCM',
+                                 'PLF_Percentage',
+                                 'Fuel_Cost_per_Unit',
+                                 'Avg_Tariff (ECR)',
+                                 'RE_Share_Percentage'
+                             ])
 
     prediction = model.predict(input_df)
     predicted_power, predicted_co2 = prediction[0]
@@ -53,3 +52,19 @@ if submit:
     st.metric("💰 Revenue", f"₹{revenue:,.2f} Cr")
     st.metric("🔥 Fuel Cost", f"₹{cost:,.2f} Cr")
     st.metric("📈 Estimated Profit", f"₹{profit:,.2f} Cr")
+    
+    result_df = input_df.copy()
+    result_df["Predicted_Power_BU"] = predicted_power
+    result_df["Predicted_CO2_Tonnes"] = predicted_co2
+    result_df["Revenue_Cr"] = revenue
+    result_df["Fuel_Cost_Cr"] = cost
+    result_df["Profit_Cr"] = profit
+
+    csv = result_df.to_csv(index=False)
+
+    st.download_button(
+        label="📥 Download Prediction as CSV",
+        data=csv,
+        file_name="ntpc_prediction.csv",
+        mime="text/csv"
+    )
