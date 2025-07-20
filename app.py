@@ -36,7 +36,7 @@ if submit:
         'PLF_Percentage',
         'Fuel_Cost_per_Unit',
         'Avg_Tariff (ECR)',
-        'RE_Share_Percentage_pranjal'
+        'RE_Share_Percentage'
     ])
 
     prediction = model.predict(input_df)
