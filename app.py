@@ -138,8 +138,9 @@ if submit:
     if installed_capacity > 80000 and predicted_power < 200:
         suggestions.append("Installed capacity is underutilized. Investigate operational bottlenecks.")
 
-    if plf > 90 and CO2 := predicted_co2 > 1000000:
-        suggestions.append("Despite high PLF, CO₂ emissions are high. Optimize combustion technology or fuel mix.")
+    if plf > 90 and predicted_co2 > 1000000:
+    suggestions.append("You are running at high efficiency (high PLF), but CO2 emissions are too high. Consider fuel with better emission quality or increase renewable share.")
+
 
     if suggestions:
         for s in suggestions:
