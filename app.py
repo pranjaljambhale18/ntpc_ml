@@ -21,7 +21,7 @@ with st.form("prediction_form"):
     with col2:
         fuel_cost = st.number_input("Fuel Cost per Unit (₹/kWh)", value=3.2)
         avg_tariff = st.number_input("Average Tariff (₹/kWh)", value=4.0)
-        re_share = st.slider("RE Share (%)", 0, 100, 28)
+        re_share = st.slider("RE Share _pranjal_ (%)", 0, 100, 28)
 
     submit = st.form_submit_button("Predict")
 
